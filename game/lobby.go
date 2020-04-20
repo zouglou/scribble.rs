@@ -194,10 +194,9 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 
 		lowerCasedInput := strings.ToLower(trimmed)
 		lowerCasedSearched := strings.ToLower(lobby.CurrentWord)
-		
-		t := transform.Chain(norm.NFD, transform.RemoveFunc(func(r rune) bool {return unicode.Is(unicode.Mn, r)}), norm.NFC)
-   		normInput, _, _ := transform.String(t, lowerCasedInput)
-   		normSearched, _, _ := transform.String(t, lowerCasedSearched)
+
+		normInput := removeAccents(lowerCasedInput)
+		normSearched := removeAccents(lowerCasedSearched)
 
 		if normSearched == normInput {
 			secondsLeft := lobby.RoundEndTime/1000 - time.Now().UTC().UnixNano()/1000000000
@@ -218,7 +217,7 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 			}
 
 			return
-		} else if levenshtein.ComputeDistance(lowerCasedInput, lowerCasedSearched) == 1 {
+		} else if levenshtein.ComputeDistance(normInput, normSearched) == 1 {
 			WriteAsJSON(sender, JSEvent{Type: "system-message", Data: fmt.Sprintf("'%s' is very close.", trimmed)})
 		}
 
@@ -785,4 +784,10 @@ func (lobby *Lobby) JoinPlayer(playerName string) *Player {
 
 func (lobby *Lobby) canDraw(player *Player) bool {
 	return lobby.Drawer == player && lobby.CurrentWord != ""
+}
+
+func removeAccents(s string) string {
+	t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
+	r, _, _ := transform.String(t, s)
+	return r
 }
