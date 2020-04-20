@@ -491,6 +491,7 @@
             playWav('/resources/plop.wav');
         } else if (parsed.type === "update-wordhint") {
             turnDialog.style.visibility = "hidden";
+            playWav('/resources/plop.wav');
             applyWordHints(parsed.data);
         } else if (parsed.type === "message") {
             applyMessage("", parsed.data.author, parsed.data.content);
@@ -597,6 +598,7 @@
             let stateStyleClass;
             if (player.state === 2) {
                 stateStyleClass = 'player-done';
+                playWav('/resources/end-turn.wav');
             } else {
                 stateStyleClass = '';
             }

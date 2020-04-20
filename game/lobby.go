@@ -13,6 +13,7 @@ import (
 	"time"
 	"unicode"
 
+    "golang.org/x/text/runes"
     "golang.org/x/text/transform"
     "golang.org/x/text/unicode/norm"
 
@@ -217,11 +218,12 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 			}
 
 			return
-		} else if levenshtein.ComputeDistance(normInput, normSearched) == 1 {
+		} else if dist := levenshtein.ComputeDistance(normInput, normSearched) ; dist > 0 && dist < 3  {
 			WriteAsJSON(sender, JSEvent{Type: "system-message", Data: fmt.Sprintf("'%s' is very close.", trimmed)})
+		} else {
+			sendMessageToAll(trimmed, sender, lobby)
 		}
 
-		sendMessageToAll(trimmed, sender, lobby)
 	}
 }
 
