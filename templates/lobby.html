@@ -34,7 +34,7 @@
 
             <button onclick="showNameChangeDialog()" class="dialog-button header-button"
                     alt="Change your name" title="Change your name">
-                <img src="/resources/user.svg" class="header-button-image"/>
+                <img src="/resources/user.svg" class="header-button-image"/> <b style="color: white;">CHANGE TON NOM ICI</b>
             </button>
         </div>
         <div id="word-container" style="position:absolute;left: 50%; transform: translate(-50%, 0);"></div>
@@ -73,6 +73,10 @@
                     <span class="dialog-title">Vote to kick a player</span>
                     <div id="kick-dialog-players"></div>
                     <button onclick="hideKickDialog()" class="dialog-button dialog-close-button">Close</button>
+                </div>
+
+                <div id="turn-dialog" class="center-dialog-content">
+                    <span class="dialog-title"><span id="next-player">Someone</span> is choosing a word</span>
                 </div>
             </div>
         </div>
@@ -231,6 +235,8 @@
 
     const kickDialog = document.getElementById("kick-dialog");
     const kickDialogPlayers = document.getElementById("kick-dialog-players");
+
+    const turnDialog = document.getElementById("turn-dialog");
 
     const soundToggleLabel = document.getElementById("sound-toggle-label");
     let sound = localStorage.getItem("sound") === "true";
@@ -484,6 +490,7 @@
         } else if (parsed.type === "correct-guess") {
             playWav('/resources/plop.wav');
         } else if (parsed.type === "update-wordhint") {
+            turnDialog.style.visibility = "hidden";
             applyWordHints(parsed.data);
         } else if (parsed.type === "message") {
             applyMessage("", parsed.data.author, parsed.data.content);
@@ -499,15 +506,29 @@
             clear(context)
         } else if (parsed.type === "next-turn") {
             //If a player doesn't choose, the dialog will still be up.
-            wordDialog.style.visibility = "hidden";
+            wordDialog.style.visibility = "hidden";            
             playWav('/resources/end-turn.wav');
 
             clear(context);
-
+            
             roundEndTime = parsed.data.roundEndTime;
             applyRounds(parsed.data.round, maxRounds);
             applyPlayers(parsed.data.players);
 
+            drawer = "";
+            parsed.data.players.forEach(function (player) {
+                if (player.state === 1 && player.id != ownID)
+                {
+                    drawer = player.name;
+                }
+            });
+
+            if (drawer != "")
+            {
+                document.getElementById('next-player').innerHTML = drawer;
+                turnDialog.style.visibility = "visible";
+            }
+            
             //We clear this, since there's no word chosen right now.
             wordContainer.innerHTML = "";
 
@@ -738,6 +759,156 @@
 
     drawingBoard.onmousemove = mouseUpdate;
     drawingBoard.onmouseleave = mouseUpdate;
+
+    let sizeSlot = 0;
+    function wheelSize(e) {
+        event.preventDefault();
+        
+        sizeSlot += Math.min(Math.max(-1, e.deltaY), 1);
+        if (sizeSlot < 0) {
+            sizeSlot = 0;
+        } else if (sizeSlot > 3) {
+            sizeSlot = 3;
+        }
+
+        switch (sizeSlot) {
+            case 0:
+                n = 8;
+                break;
+            case 1:
+                n = 15;
+                break;
+            case 2:
+                n = 30;
+                break;
+            case 3:
+                n = 40;
+                break;
+            default:
+                console.log('No existing slot?');
+                break;
+        }
+
+        document.getElementById('size' + n).checked = true;
+        setLineWidth(n);
+    }
+    drawingBoard.onwheel = wheelSize;
+
+    let toolSlot = 0;
+    function wheelTool(e) {
+        event.preventDefault();
+        
+        toolSlot += Math.min(Math.max(-1, e.deltaY), 1);
+        if (toolSlot < 0) {
+            toolSlot = 0;
+        } else if (toolSlot > 2) {
+            toolSlot = 2;
+        }
+
+        switch (toolSlot) {
+            case 0:
+                n = 'pencil';
+                break;
+            case 1:
+                n = 'fill';
+                break;
+            case 2:
+                n = 'rubber';
+                break;
+            default:
+                console.log('No existing slot?');
+                break;
+        }
+
+        document.getElementById('tool-type-' + n).checked = true;
+        chooseTool(n);
+    }
+    document.getElementsByClassName('pencil-sizes-container')[0].onwheel = wheelTool;
+
+    let colorSlot = 0;
+    function wheelColor(e) {
+        event.preventDefault();
+        
+        colorSlot += Math.min(Math.max(-1, e.deltaY), 1);
+        if (colorSlot < 0) {
+            colorSlot = 0;
+        } else if (colorSlot > 21) {
+            colorSlot = 21;
+        }
+
+        switch (colorSlot) {
+            case 0:
+                setColor('#ffffff');
+                break;
+            case 1:
+                setColor('#c1c1c1');
+                break;
+            case 2:
+                setColor('#ef130b');
+                break;
+            case 3:
+                setColor('#ff7100');
+                break;
+            case 4:
+                setColor('#ffe400');
+                break;
+            case 5:
+                setColor('#00cc00');
+                break;
+            case 6:
+                setColor('#00b2ff');
+                break;
+            case 7:
+                setColor('#231fd3');
+                break;
+            case 8:
+                setColor('#a300ba');
+                break;
+            case 9:
+                setColor('#d37caa');
+                break;
+            case 10:
+                setColor('#a0522d');
+                break;
+            case 11:
+                setColor('#000000');
+                break;
+            case 12:
+                setColor('#4c4c4c');
+                break;
+            case 13:
+                setColor('#740b07');
+                break;
+            case 14:
+                setColor('#c23800');
+                break;
+            case 15:
+                setColor('#e8a200');
+                break;
+            case 16:
+                setColor('#005510');
+                break;
+            case 17:
+                setColor('#00569e');
+                break;
+            case 18:
+                setColor('#0e0865');
+                break;
+            case 19:
+                setColor('#550069');
+                break;
+            case 20:
+                setColor('#a75574');
+                break;
+            case 21:
+                setColor('#63300d');
+                break;
+            default:
+                console.log('No existing slot?');
+                break;
+        }
+    }
+    document.getElementsByClassName('color-button-container')[0].onwheel = wheelColor;
 
     // necessary for mousemove to not use the previous exit coordinates.
     window.onmousemove = function (e) {

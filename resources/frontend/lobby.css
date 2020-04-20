@@ -1,5 +1,5 @@
 body {
-    background-color: antiquewhite;
+    background-color: var(--col1);
 }
 
 .noscript {
@@ -84,10 +84,15 @@ body {
     z-index: 20;
 }
 
+#center-dialog .dialog-button {
+    font-size: 3rem;
+    border: 2px solid rgb(225, 221, 221);
+}
+
 .center-dialog-content {
     pointer-events: all;
     touch-action: auto;
-    background-color: rgb(225, 221, 221);
+    background-color: var(--col1);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -157,7 +162,7 @@ body {
     margin-bottom: 15px;
     font-size: 3rem;
     font-weight: bold;
-    color: rgb(240, 105, 127);
+    color: var(--col3);
     margin-left: 20px;
     margin-right: 20px;
 }
@@ -184,14 +189,15 @@ input[type="button"]:hover,
 .line-width-button-content:hover,
 #color-picker:hover {
     /** Important insures it won't be prevented by a 'transparent' main color*/
-    background-color: rgb(244, 183, 247) !important;
+    background-color: var(--col3) !important;
 }
 
 button:active,
 input[type="button"]:active,
 #color-picker:active {
+    opacity: 0.9;
     /** Important insures it won't be prevented by a 'transparent' main color*/
-    background-color: rgb(243, 132, 247) !important;
+    background-color: var(--col3) !important;
 }
 
 .header-button {
@@ -278,7 +284,7 @@ input[type="button"]:active,
 }
 
 .system-message {
-    color: red;
+    color: green;
 }
 
 #toolbox {

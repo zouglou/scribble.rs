@@ -11,6 +11,10 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode"
+
+    "golang.org/x/text/transform"
+    "golang.org/x/text/unicode/norm"
 
 	commands "github.com/Bios-Marcel/cmdp"
 	"github.com/Bios-Marcel/discordemojimap"
@@ -25,7 +29,7 @@ var (
 
 var (
 	LobbySettingBounds = &SettingBounds{
-		MinDrawingTime:       60,
+		MinDrawingTime:       10,
 		MaxDrawingTime:       300,
 		MinRounds:            1,
 		MaxRounds:            20,
@@ -35,10 +39,10 @@ var (
 		MaxClientsPerIPLimit: 24,
 	}
 	SupportedLanguages = map[string]string{
+		"french":  "1. Nos mots + dico Français",
+		"italian": "1. Juste nos mots",
 		"english": "English",
-		"italian": "Italian",
 		"german":  "German",
-		"french":  "French",
 		"dutch":   "Dutch",
 	}
 )
@@ -126,11 +130,13 @@ func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) er
 
 		drawer := lobby.Drawer
 		if player == drawer && len(lobby.WordChoice) > 0 && chosenIndex >= 0 && chosenIndex <= 2 {
+			startTimer(lobby)
 			lobby.CurrentWord = lobby.WordChoice[chosenIndex]
 			lobby.WordChoice = nil
 			lobby.WordHints = createWordHintFor(lobby.CurrentWord, false)
 			lobby.WordHintsShown = createWordHintFor(lobby.CurrentWord, true)
 			triggerWordHintUpdate(lobby)
+			triggerPlayersUpdate(lobby)
 		}
 	} else if received.Type == "kick-vote" {
 		if !lobby.EnableVotekick {
@@ -185,9 +191,15 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 	if sender.State == Drawing || sender.State == Standby {
 		sendMessageToAllNonGuessing(trimmed, sender, lobby)
 	} else if sender.State == Guessing {
+
 		lowerCasedInput := strings.ToLower(trimmed)
 		lowerCasedSearched := strings.ToLower(lobby.CurrentWord)
-		if lowerCasedSearched == lowerCasedInput {
+		
+		t := transform.Chain(norm.NFD, transform.RemoveFunc(func(r rune) bool {return unicode.Is(unicode.Mn, r)}), norm.NFC)
+   		normInput, _, _ := transform.String(t, lowerCasedInput)
+   		normSearched, _, _ := transform.String(t, lowerCasedSearched)
+
+		if normSearched == normInput {
 			secondsLeft := lobby.RoundEndTime/1000 - time.Now().UTC().UnixNano()/1000000000
 			sender.LastScore = int(math.Ceil(math.Pow(math.Max(float64(secondsLeft), 1), 1.3) * 2))
 			sender.Score += sender.LastScore
@@ -483,6 +495,22 @@ func advanceLobby(lobby *Lobby) {
 	WriteAsJSON(lobby.Drawer, &JSEvent{Type: "your-turn", Data: lobby.WordChoice})
 }
 
+func startTimer(lobby *Lobby) {
+	if lobby.timeLeftTicker != nil {
+		lobby.timeLeftTicker.Stop()
+		lobby.timeLeftTicker = nil
+		lobby.timeLeftTickerReset <- struct{}{}
+	}
+	//We use milliseconds for higher accuracy
+	lobby.RoundEndTime = time.Now().UTC().UnixNano()/1000000 + int64(lobby.DrawingTime)*1000
+	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
+	go roundTimerTicker(lobby)
+	
+	TriggerComplexUpdateEvent("next-turn", &NextTurn{
+		RoundEndTime: int(lobby.RoundEndTime - getTimeAsMillis()),
+	}, lobby)
+}
+
 func endGame(lobby *Lobby) {
 	lobby.Drawer = nil
 	lobby.Round = 0
@@ -589,9 +617,16 @@ func createWordHintFor(word string, showAll bool) []*WordHint {
 				Underline: !irrelevantChar,
 			})
 		} else {
-			wordHints = append(wordHints, &WordHint{
-				Underline: !irrelevantChar,
-			})
+			if irrelevantChar {
+				wordHints = append(wordHints, &WordHint{
+					Character: char,
+					Underline: !irrelevantChar,
+				})
+			} else {
+				wordHints = append(wordHints, &WordHint{
+					Underline: !irrelevantChar,
+				})
+			}
 		}
 	}
 
