@@ -490,10 +490,9 @@
         } else if (parsed.type === "correct-guess") {
             playWav('/resources/plop.wav');
         } else if (parsed.type === "update-wordhint") {
-            turnDialog.style.visibility = "hidden";
-            playWav('/resources/plop.wav');
             applyWordHints(parsed.data);
             turnDialog.style.visibility = "hidden";
+            playWav('/resources/plop.wav');
         } else if (parsed.type === "message") {
             applyMessage("", parsed.data.author, parsed.data.content);
         } else if (parsed.type === "system-message") {
@@ -508,11 +507,11 @@
             clear(context)
         } else if (parsed.type === "next-turn") {
             //If a player doesn't choose, the dialog will still be up.
-            wordDialog.style.visibility = "hidden";            
+            wordDialog.style.visibility = "hidden";
             playWav('/resources/end-turn.wav');
 
             clear(context);
-            
+
             roundEndTime = parsed.data.roundEndTime;
             applyRounds(parsed.data.round, maxRounds);
             applyPlayers(parsed.data.players);
