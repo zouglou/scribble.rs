@@ -74,7 +74,7 @@
                     <div id="kick-dialog-players"></div>
                     <button onclick="hideKickDialog()" class="dialog-button dialog-close-button">Close</button>
                 </div>
-
+                
                 <div id="turn-dialog" class="center-dialog-content">
                     <span class="dialog-title"><span id="next-player">Someone</span> is choosing a word</span>
                 </div>
@@ -493,6 +493,7 @@
             turnDialog.style.visibility = "hidden";
             playWav('/resources/plop.wav');
             applyWordHints(parsed.data);
+            turnDialog.style.visibility = "hidden";
         } else if (parsed.type === "message") {
             applyMessage("", parsed.data.author, parsed.data.content);
         } else if (parsed.type === "system-message") {
@@ -517,7 +518,8 @@
             applyPlayers(parsed.data.players);
 
             drawer = "";
-            parsed.data.players.forEach(function (player) {
+            cached = parsed.data.players;
+            cached.forEach(function (player) {
                 if (player.state === 1 && player.id != ownID)
                 {
                     drawer = player.name;
@@ -529,7 +531,6 @@
                 document.getElementById('next-player').innerHTML = drawer;
                 turnDialog.style.visibility = "visible";
             }
-            
             //We clear this, since there's no word chosen right now.
             wordContainer.innerHTML = "";
 
