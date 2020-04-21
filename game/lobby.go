@@ -12,11 +12,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kennygrant/sanitize"
 	commands "github.com/Bios-Marcel/cmdp"
 	"github.com/Bios-Marcel/discordemojimap"
 	"github.com/agnivade/levenshtein"
 	petname "github.com/dustinkirkland/golang-petname"
+	"github.com/kennygrant/sanitize"
 )
 
 var (
@@ -214,7 +214,7 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 			}
 
 			return
-		} else if dist := levenshtein.ComputeDistance(normInput, normSearched) ; dist > 0 && dist < 3  {
+		} else if dist := levenshtein.ComputeDistance(normInput, normSearched); dist > 0 && dist < 3 {
 			WriteAsJSON(sender, JSEvent{Type: "system-message", Data: fmt.Sprintf("'%s' is very close.", trimmed)})
 		} else {
 			sendMessageToAll(trimmed, sender, lobby)
@@ -501,7 +501,7 @@ func startTimer(lobby *Lobby) {
 	lobby.RoundEndTime = time.Now().UTC().UnixNano()/1000000 + int64(lobby.DrawingTime)*1000
 	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
 	go roundTimerTicker(lobby)
-	
+
 	TriggerComplexUpdateEvent("next-turn", &NextTurn{
 		RoundEndTime: int(lobby.RoundEndTime - getTimeAsMillis()),
 	}, lobby)
