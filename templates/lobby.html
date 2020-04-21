@@ -761,6 +761,86 @@
     drawingBoard.onmousemove = mouseUpdate;
     drawingBoard.onmouseleave = mouseUpdate;
 
+    let sizeSlot = 0;
+        let toolSlot = 0;
+        let colorSlot = 0;
+        let colorBox = document.getElementsByClassName('color-button');
+        var keyMap = {};
+        document.body.addEventListener('keydown', function(e) {
+            keyMap[e.key] = true;
+        });
+        document.body.addEventListener('keyup', function(e) {
+            keyMap[e.key] = false;
+        });
+        
+        drawingBoard.onwheel = function wheelUpdate(e) {
+            event.preventDefault();
+
+            if (keyMap['g']) {
+                sizeSlot += Math.min(Math.max(-1, e.deltaY), 1);
+                if (sizeSlot < 0) {
+                    sizeSlot = 0;
+                } else if (sizeSlot > 3) {
+                    sizeSlot = 3;
+                }
+
+                switch (sizeSlot) {
+                    case 0:
+                        n = 8;
+                        break;
+                    case 1:
+                        n = 15;
+                        break;
+                    case 2:
+                        n = 30;
+                        break;
+                    case 3:
+                        n = 40;
+                        break;
+                    default:
+                        console.log('No existing slot?');
+                        break;
+                }
+                document.getElementById('size' + n).checked = true;
+                setLineWidth(n);
+        
+            } else if (keyMap['f']) {
+                toolSlot += Math.min(Math.max(-1, e.deltaY), 1);
+                if (toolSlot < 0) {
+                    toolSlot = 0;
+                } else if (toolSlot > 2) {
+                    toolSlot = 2;
+                }
+
+                switch (toolSlot) {
+                    case 0:
+                        n = 'pencil';
+                        break;
+                    case 1:
+                        n = 'fill';
+                        break;
+                    case 2:
+                        n = 'rubber';
+                        break;
+                    default:
+                        console.log('No existing slot?');
+                        break;
+                }
+                tool = document.getElementById('tool-type-' + n);
+                tool.checked = true;
+                tool.onchange();
+            } else if (keyMap['d']) {
+
+                colorSlot += Math.min(Math.max(-1, e.deltaY), 1);
+                if (colorSlot < 0) {
+                    colorSlot = 0;
+                } else if (colorSlot > colorBox.length) {
+                    colorSlot = colorBox.length;
+                }
+                colorBox[colorSlot].onclick();
+            }
+        };
+
     // necessary for mousemove to not use the previous exit coordinates.
     window.onmousemove = function (e) {
         let clientRect = drawingBoard.getBoundingClientRect();
