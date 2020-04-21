@@ -12,11 +12,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/kennygrant/sanitize"
 	commands "github.com/Bios-Marcel/cmdp"
 	"github.com/Bios-Marcel/discordemojimap"
 	"github.com/agnivade/levenshtein"
 	petname "github.com/dustinkirkland/golang-petname"
-	"github.com/kennygrant/sanitize"
 )
 
 var (
@@ -26,7 +26,7 @@ var (
 
 var (
 	LobbySettingBounds = &SettingBounds{
-		MinDrawingTime:       10,
+		MinDrawingTime:       60,
 		MaxDrawingTime:       300,
 		MinRounds:            1,
 		MaxRounds:            20,
