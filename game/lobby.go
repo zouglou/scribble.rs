@@ -219,7 +219,6 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 		} else {
 			sendMessageToAll(trimmed, sender, lobby)
 		}
-
 	}
 }
 
